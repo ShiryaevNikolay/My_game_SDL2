@@ -26,7 +26,7 @@ const int SCREEN_HEIGHT = 900;
 
 // путь к файлу с картинкой, содержащей файлы движения
 static char sprite[] = "resources/adventurer.png";
-//static char wooden[] = "resources/wooden.png";
+static char tree[] = "resources/wooden.png";
 // увеличение выводимых спрайтов (в данном примере исходно 32х32)
 int scale = 4;
 
@@ -46,7 +46,7 @@ SDL_Surface* screenSurface = NULL;
 
 // Переенные для хранения анимации персонажа
 SDL_Texture* sprite_sheet;
-//SDL_Texture* wooden_sheet;
+SDL_Texture* tree_sheet;
 // текущий кадр анимации
 int anim_phase = 0;
 // фаза анимации (бег, стояние на месте ...)
@@ -57,53 +57,50 @@ int anim_phase_max[16] = { 13, 8, 10, 10, 10, 6, 4, 7, 13, 8, 10, 10, 10, 6, 4,
 // время с предыдущего кадра анимации
 uint32_t last_frame;
 // время в мс на 1 кадр
-#define frame_time  70
+#define frame_time  60
 
-//// Структура для объекта
-//typedef struct things {
-//	int x;
-//	int y;
-//	struct things *next;
-//} things;
-//
-//things* getLast(things *last) {
-//	if (last == NULL) {
-//		return NULL;
-//	}
-//	while (last->next) {
-//		last = last->next;
-//	}
-//	return last;
-//}
-//
-//things* pushThing(things* head){
-//	things* el = getLast(head);
-//	things* tmp = (things*)malloc(sizeof(things));
-//	tmp->x = rand() % 1000;
-//	tmp->y = rand() % 700;
-//	tmp->next = NULL;
-//	el = tmp;
-//	return el;
-//}
+// Структура для объекта
+typedef struct things {
+	int x;
+	int y;
+	struct things *next;
+} things;
+
+things* getLast(things *last) {
+	if (last == NULL) {
+		return NULL;
+	}
+	while (last->next) {
+		last = last->next;
+	}
+	return last;
+}
+
+void pushThing(things* head){
+	things* el = getLast(head);
+	things* tmp = (things*)malloc(sizeof(things));
+	tmp->x = rand() % 1500;
+	tmp->y = rand() % 800;
+	tmp->next = NULL;
+	el->next = tmp;
+}
 
 int main(int argc, char *argv[]) {
 
-//	things* head = NULL;
+	things* head = (things*)malloc(sizeof(things));
+	head->next = NULL;
 	// Инициализируем библиотеку SDL
 	if (initSDL() > 1) {
 		printf("Error in initialization.\n");
 	} else {
 		// Загружаем картирнку из файла
 		sprite_sheet = loadImage(sprite);
-//		wooden_sheet = loadImage(wooden);
+		tree_sheet = loadImage(tree);
 
 		SDL_Rect obj_size, screen_move;
 		last_frame=SDL_GetTicks();
 		screen_move.x = 500;
 		screen_move.y = 500;
-//		SDL_Rect thing_size;
-//		thing_size.w = 120;
-//		thing_size.h = 120;
 
 		int quit = 0;
 		// Структура для хранения информации о событии
@@ -140,9 +137,9 @@ int main(int argc, char *argv[]) {
 						case SDLK_a:
 							anim_type = 4;
 							break;
-//						case SDLK_f:
-//							head = pushThing(head);
-//							break;
+						case SDLK_f:
+							pushThing(head);
+							break;
 						case SDLK_ESCAPE:
 							// Нажата клавиша ESC, меняем флаг выхода
 							quit = 1;
@@ -168,14 +165,25 @@ int main(int argc, char *argv[]) {
 			screen_move.h = SCREEN_WIDTH / 10;
 			screen_move.w = SCREEN_WIDTH / 10;
 
-//			thing_size.x = head->x;
-//			thing_size.y = head->y;
+			SDL_Rect tree_size, tree_move;
+			tree_size.x = 500;
+			tree_size.y = 500;
+			tree_size.h = 32;
+			tree_size.w = 32;
+
 
 			// Очищаем буфер рисования
 			SDL_RenderClear(renderer);
 
 			SDL_RenderCopy(renderer, sprite_sheet, &obj_size, &screen_move);
-//			SDL_RenderCopy(renderer, wooden_sheet, &thing_size, NULL);
+
+			things* last_el = head->next;
+			while (last_el) {
+				tree_move.x = last_el->x;
+				tree_move.y = last_el->y;
+				last_el = last_el->next;
+				SDL_RenderCopy(renderer, tree_sheet, &tree_size, &tree_move);
+			}
 			// Выводим буфер на экран
 			SDL_RenderPresent(renderer);
 
