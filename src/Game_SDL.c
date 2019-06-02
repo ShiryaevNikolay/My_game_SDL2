@@ -26,7 +26,7 @@ const int SCREEN_HEIGHT = 900;
 
 // путь к файлу с картинкой, содержащей файлы движения
 static char sprite[] = "resources/adventurer.png";
-static char tree[] = "resources/wooden.png";
+static char wooden[] = "resources/wooden.png";
 // увеличение выводимых спрайтов (в данном примере исходно 32х32)
 int scale = 4;
 
@@ -46,7 +46,7 @@ SDL_Surface* screenSurface = NULL;
 
 // Переенные для хранения анимации персонажа
 SDL_Texture* sprite_sheet;
-SDL_Texture* tree_sheet;
+SDL_Texture* wooden_sheet;
 // текущий кадр анимации
 int anim_phase = 0;
 // фаза анимации (бег, стояние на месте ...)
@@ -85,9 +85,32 @@ void pushThing(things* head){
 	el->next = tmp;
 }
 
+things* getPreLast (things* head) {
+	if (head == NULL) {
+		return NULL;
+	}
+	while (head->next->next) {
+		head = head->next;
+	}
+	return head;
+}
+
+void deleteThing (things* head) {
+	things* el = getPreLast(head);
+	if (el->x != -10 && el->y != -10) {
+		free(el->next);
+		el->next = NULL;
+	} else if (el->x == -10 && el->y == -10) {
+		free(el->next);
+		el->next = NULL;
+	}
+}
+
 int main(int argc, char *argv[]) {
 
 	things* head = (things*)malloc(sizeof(things));
+	head->x = -10;
+	head->y = -10;
 	head->next = NULL;
 	// Инициализируем библиотеку SDL
 	if (initSDL() > 1) {
@@ -95,12 +118,12 @@ int main(int argc, char *argv[]) {
 	} else {
 		// Загружаем картирнку из файла
 		sprite_sheet = loadImage(sprite);
-		tree_sheet = loadImage(tree);
+		wooden_sheet = loadImage(wooden);
 
 		SDL_Rect obj_size, screen_move;
-		last_frame=SDL_GetTicks();
-		screen_move.x = 500;
-		screen_move.y = 500;
+		last_frame = SDL_GetTicks();
+		screen_move.x = SCREEN_WIDTH / 2;
+		screen_move.y = SCREEN_HEIGHT / 2;
 
 		int quit = 0;
 		// Структура для хранения информации о событии
@@ -140,6 +163,9 @@ int main(int argc, char *argv[]) {
 						case SDLK_f:
 							pushThing(head);
 							break;
+						case SDLK_d:
+							deleteThing(head);
+							break;
 						case SDLK_ESCAPE:
 							// Нажата клавиша ESC, меняем флаг выхода
 							quit = 1;
@@ -165,11 +191,11 @@ int main(int argc, char *argv[]) {
 			screen_move.h = SCREEN_WIDTH / 10;
 			screen_move.w = SCREEN_WIDTH / 10;
 
-			SDL_Rect tree_size, tree_move;
-			tree_size.x = 500;
-			tree_size.y = 500;
-			tree_size.h = 32;
-			tree_size.w = 32;
+			SDL_Rect wood_size, wood_move;
+			wood_size.x = 500;
+			wood_size.y = 500;
+			wood_size.h = 32;
+			wood_size.w = 32;
 
 
 			// Очищаем буфер рисования
@@ -179,10 +205,10 @@ int main(int argc, char *argv[]) {
 
 			things* last_el = head->next;
 			while (last_el) {
-				tree_move.x = last_el->x;
-				tree_move.y = last_el->y;
+				wood_move.x = last_el->x;
+				wood_move.y = last_el->y;
 				last_el = last_el->next;
-				SDL_RenderCopy(renderer, tree_sheet, &tree_size, &tree_move);
+				SDL_RenderCopy(renderer, wooden_sheet, &wood_size, &wood_move);
 			}
 			// Выводим буфер на экран
 			SDL_RenderPresent(renderer);
