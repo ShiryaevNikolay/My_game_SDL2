@@ -27,8 +27,8 @@
 #endif
 
 // Размеры окна для вывода
-const int SCREEN_WIDTH = 1600;
-const int SCREEN_HEIGHT = 900;
+int SCREEN_WIDTH = 1600;
+int SCREEN_HEIGHT = 900;
 
 uint8_t red = 0xFF, green = 0xFF, blue = 0xFF;
 
@@ -83,7 +83,7 @@ things* getLast(things *last) {
 	}
 	return last;
 }
-
+// Функция добавления предмета в рандомное место
 void pushThing(things* head){
 	things* el = getLast(head);
 	things* tmp = (things*)malloc(sizeof(things));
@@ -92,6 +92,15 @@ void pushThing(things* head){
 	tmp->next = NULL;
 	el->next = tmp;
 }
+// Функция добавления в рендер предметы из файла
+void pushThingFromFile(FILE* file, things* head) {
+	things* element = getLast(head);
+	things* tmp = (things*)malloc(sizeof(things));
+	fscanf(file, "%d %d", &tmp->x, &tmp->y);
+	tmp->next = NULL;
+	element->next = tmp;
+}
+
 
 things* getPreLast (things* head) {
 	if (head->next == NULL) {
@@ -115,12 +124,31 @@ void deleteThing (things *head) {
 	}
 }
 
+unsigned int ur, ug, ub;
+
 int main(int argc, char *argv[]) {
+	FILE* save_file;
 
 	things* head = (things*)malloc(sizeof(things));
 	head->x = 0;
 	head->y = 0;
 	head->next = NULL;
+
+	// Считываем настройки игры из файла
+	save_file = fopen("save_game.txt", "r");
+	// Считываем размер окна
+	fscanf(save_file, "%d %d", &SCREEN_WIDTH, &SCREEN_HEIGHT);
+	// Считываем цвет фона
+	fscanf(save_file, "%X %X %X", &ur, &ug, &ub);
+	red = (uint8_t)ur;
+	green = (uint8_t)ug;
+	blue = (uint8_t)ub;
+	// Считываем расположение предметов
+	while (!feof(save_file)) {
+		pushThingFromFile(save_file, head);
+	}
+	fclose(save_file);
+
 	// Инициализируем библиотеку SDL
 	if (initSDL() > 1) {
 		printf("Error in initialization.\n");
@@ -128,6 +156,17 @@ int main(int argc, char *argv[]) {
 		// Загружаем картирнку из файла
 		sprite_sheet = loadImage(sprite);
 		wooden_sheet = loadImage(wooden);
+
+		SDL_Rect wood_size, wood_move;
+		// Растягиваем текстуру в полную картинку
+		wood_size.x = 0;
+		wood_size.y = 0;
+		wood_size.h = 1500;
+		wood_size.w = 1500;
+
+		// Размер дерева
+		wood_move.h = SCREEN_WIDTH / 7;
+		wood_move.w = SCREEN_WIDTH / 7;
 
 		SDL_Rect obj_size, screen_move;
 		last_frame = SDL_GetTicks();
@@ -154,18 +193,18 @@ int main(int argc, char *argv[]) {
 						// нажатой клавиши
 						switch (event.key.keysym.sym) {
 						case SDLK_UP:	// Движение вверх
-							screen_move.y -= 15;
+							screen_move.y -= SCREEN_WIDTH / 100;
 							break;
 						case SDLK_DOWN:	// Движение вниз
-							screen_move.y += 15;
+							screen_move.y += SCREEN_WIDTH / 100;
 							break;
 						case SDLK_LEFT:	// Движение влево
 							anim_type = 9;
-							screen_move.x -= 15;
+							screen_move.x -= SCREEN_WIDTH / 100;
 							break;
 						case SDLK_RIGHT:	// Движение вправо
 							anim_type = 1;
-							screen_move.x += 15;
+							screen_move.x += SCREEN_WIDTH / 100;
 							break;
 						case SDLK_a:	// Атака
 							anim_type = 4;
@@ -178,12 +217,15 @@ int main(int argc, char *argv[]) {
 							break;
 						case SDLK_r:
 							red = red + 10;
+							SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
 							break;
 						case SDLK_g:
 							green = green + 10;
+							SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
 							break;
 						case SDLK_b:
 							blue = blue - 10;
+							SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
 							break;
 						case SDLK_ESCAPE:	// Выход из игры
 							// Нажата клавиша ESC, меняем флаг выхода
@@ -193,7 +235,6 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
-			SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
 			// отрисовка картинки с новым кадром анимации
 			// проверка прошедшего времени:
 			if ((SDL_GetTicks()- last_frame) >= frame_time) {
@@ -210,17 +251,6 @@ int main(int argc, char *argv[]) {
 			// место для вывода кадра анимации и его увеличение
 			screen_move.h = SCREEN_WIDTH / 10;
 			screen_move.w = SCREEN_WIDTH / 10;
-
-			SDL_Rect wood_size, wood_move;
-			// Растягиваем текстуру в полную картинку
-			wood_size.x = 0;
-			wood_size.y = 0;
-			wood_size.h = 1500;
-			wood_size.w = 1500;
-
-			// Размер дерева
-			wood_move.h = SCREEN_WIDTH / 7;
-			wood_move.w = SCREEN_WIDTH / 7;
 
 			// Очищаем буфер рисования
 			SDL_RenderClear(renderer);
