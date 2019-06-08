@@ -4,8 +4,14 @@
  Author      : Riapolov Mikhail
  Version     :
  Copyright   : Use at your own risk
- Description : Вывод маленького анимированного человечка
- на белом фоне
+ Description : Для передвижения используйте стрелки.
+ 	 	 	   a - анимация атаки
+ 	 	 	   f - добавление предмета (дерево)
+ 	 	 	   d - удаление предмета (дерево)
+ 	 	 	   r - увеличение насыщенности красного цвета
+ 	 	 	   g - увеличение насыщенности зелёного цвета
+ 	 	 	   b - увеличение насыщенности синего цвета
+ 	 	 	   s - сохранение настроек
  ============================================================================
  */
 
@@ -23,6 +29,8 @@
 // Размеры окна для вывода
 const int SCREEN_WIDTH = 1600;
 const int SCREEN_HEIGHT = 900;
+
+uint8_t red = 0xFF, green = 0xFF, blue = 0xFF;
 
 // путь к файлу с картинкой, содержащей файлы движения
 static char sprite[] = "resources/adventurer.png";
@@ -168,6 +176,15 @@ int main(int argc, char *argv[]) {
 						case SDLK_d:	// Удаление предметов
 							deleteThing(head);
 							break;
+						case SDLK_r:
+							red = red + 10;
+							break;
+						case SDLK_g:
+							green = green + 10;
+							break;
+						case SDLK_b:
+							blue = blue - 10;
+							break;
 						case SDLK_ESCAPE:	// Выход из игры
 							// Нажата клавиша ESC, меняем флаг выхода
 							quit = 1;
@@ -176,6 +193,7 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
+			SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
 			// отрисовка картинки с новым кадром анимации
 			// проверка прошедшего времени:
 			if ((SDL_GetTicks()- last_frame) >= frame_time) {
@@ -200,9 +218,9 @@ int main(int argc, char *argv[]) {
 			wood_size.h = 1500;
 			wood_size.w = 1500;
 
-			// Размеры предмета (дерева)
-			wood_move.h = 200;
-			wood_move.w = 200;
+			// Размер дерева
+			wood_move.h = SCREEN_WIDTH / 7;
+			wood_move.w = SCREEN_WIDTH / 7;
 
 			// Очищаем буфер рисования
 			SDL_RenderClear(renderer);
@@ -261,7 +279,7 @@ int initSDL() {
 				success = 0;
 			} else {
 				// Задаём цвет отрисовки по умолчанию - белый
-				SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+				SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
 			}
 		}
 	}
