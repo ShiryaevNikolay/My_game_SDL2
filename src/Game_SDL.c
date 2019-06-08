@@ -86,7 +86,7 @@ void pushThing(things* head){
 }
 
 things* getPreLast (things* head) {
-	if (head == NULL) {
+	if (head->next == NULL) {
 		return NULL;
 	}
 	while (head->next->next) {
@@ -95,12 +95,13 @@ things* getPreLast (things* head) {
 	return head;
 }
 
-void deleteThing (things* head) {
-	things* el = getPreLast(head);
-	if (el->x != -10 && el->y != -10) {
-		free(el->next);
-		el->next = NULL;
-	} else if (el->x == -10 && el->y == -10) {
+void deleteThing (things *head) {
+	things* el = NULL;
+	el = getPreLast(head);
+	if (el == NULL) {
+		free(head);
+		head = NULL;
+	} else {
 		free(el->next);
 		el->next = NULL;
 	}
@@ -109,8 +110,8 @@ void deleteThing (things* head) {
 int main(int argc, char *argv[]) {
 
 	things* head = (things*)malloc(sizeof(things));
-	head->x = -10;
-	head->y = -10;
+	head->x = 0;
+	head->y = 0;
 	head->next = NULL;
 	// Инициализируем библиотеку SDL
 	if (initSDL() > 1) {
@@ -122,8 +123,9 @@ int main(int argc, char *argv[]) {
 
 		SDL_Rect obj_size, screen_move;
 		last_frame = SDL_GetTicks();
-		screen_move.x = SCREEN_WIDTH / 2;
-		screen_move.y = SCREEN_HEIGHT / 2;
+		// Спавн персонажа в центре экрана
+		screen_move.x = SCREEN_WIDTH / 2 - SCREEN_WIDTH / 20;
+		screen_move.y = SCREEN_HEIGHT / 2 - SCREEN_WIDTH / 20;
 
 		int quit = 0;
 		// Структура для хранения информации о событии
@@ -143,30 +145,30 @@ int main(int argc, char *argv[]) {
 						// Если это нажатие на клавишу клавиатуры, смотрим код
 						// нажатой клавиши
 						switch (event.key.keysym.sym) {
-						case SDLK_UP:
+						case SDLK_UP:	// Движение вверх
 							screen_move.y -= 15;
 							break;
-						case SDLK_DOWN:
+						case SDLK_DOWN:	// Движение вниз
 							screen_move.y += 15;
 							break;
-						case SDLK_LEFT:
+						case SDLK_LEFT:	// Движение влево
 							anim_type = 9;
 							screen_move.x -= 15;
 							break;
-						case SDLK_RIGHT:
+						case SDLK_RIGHT:	// Движение вправо
 							anim_type = 1;
 							screen_move.x += 15;
 							break;
-						case SDLK_a:
+						case SDLK_a:	// Атака
 							anim_type = 4;
 							break;
-						case SDLK_f:
+						case SDLK_f:	// Добавление предметов
 							pushThing(head);
 							break;
-						case SDLK_d:
+						case SDLK_d:	// Удаление предметов
 							deleteThing(head);
 							break;
-						case SDLK_ESCAPE:
+						case SDLK_ESCAPE:	// Выход из игры
 							// Нажата клавиша ESC, меняем флаг выхода
 							quit = 1;
 							break;
@@ -192,11 +194,15 @@ int main(int argc, char *argv[]) {
 			screen_move.w = SCREEN_WIDTH / 10;
 
 			SDL_Rect wood_size, wood_move;
-			wood_size.x = 500;
-			wood_size.y = 500;
-			wood_size.h = 32;
-			wood_size.w = 32;
+			// Растягиваем текстуру в полную картинку
+			wood_size.x = 0;
+			wood_size.y = 0;
+			wood_size.h = 1500;
+			wood_size.w = 1500;
 
+			// Размеры предмета (дерева)
+			wood_move.h = 200;
+			wood_move.w = 200;
 
 			// Очищаем буфер рисования
 			SDL_RenderClear(renderer);
@@ -204,10 +210,12 @@ int main(int argc, char *argv[]) {
 			SDL_RenderCopy(renderer, sprite_sheet, &obj_size, &screen_move);
 
 			things* last_el = head->next;
+			// Добавление в список создаваемые предметы
 			while (last_el) {
 				wood_move.x = last_el->x;
 				wood_move.y = last_el->y;
 				last_el = last_el->next;
+				// Добавление в рендер предметы
 				SDL_RenderCopy(renderer, wooden_sheet, &wood_size, &wood_move);
 			}
 			// Выводим буфер на экран
@@ -245,7 +253,7 @@ int initSDL() {
 				success = 0;
 			}
 			// Получаем поверхность для рисования
-			renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+			renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 			if (renderer == NULL) {
 				// выводим ошибку, если создать окно не удалось
 				printf("Renderer could not be created! SDL_Error: %s\n",
