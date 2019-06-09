@@ -4,7 +4,9 @@
  Author      : Riapolov Mikhail
  Version     :
  Copyright   : Use at your own risk
- Description : Для передвижения используйте стрелки.
+ Description : Чтобы поменять разрешение окна, откройте файл "save_game.txt"
+ 	 	 	   и поменяйти в первой строке первые два числа (default: 1600 900).
+ 	 	 	   Для передвижения используйте стрелки.
  	 	 	   a - анимация атаки
  	 	 	   f - добавление предмета (дерево)
  	 	 	   d - удаление предмета (дерево)
@@ -96,9 +98,10 @@ void pushThing(things* head){
 void pushThingFromFile(FILE* file, things* head) {
 	things* element = getLast(head);
 	things* tmp = (things*)malloc(sizeof(things));
-	fscanf(file, "%d %d", &tmp->x, &tmp->y);
-	tmp->next = NULL;
-	element->next = tmp;
+	if (fscanf(file, "%d %d", &tmp->x, &tmp->y) != EOF) {
+		tmp->next = NULL;
+		element->next = tmp;
+	}
 }
 
 
@@ -128,6 +131,7 @@ unsigned int ur, ug, ub;
 
 int main(int argc, char *argv[]) {
 	FILE* save_file;
+	SDL_Rect obj_size, screen_move;
 
 	things* head = (things*)malloc(sizeof(things));
 	head->x = 0;
@@ -143,6 +147,8 @@ int main(int argc, char *argv[]) {
 	red = (uint8_t)ur;
 	green = (uint8_t)ug;
 	blue = (uint8_t)ub;
+	// Считываем положение персонажа
+	fscanf(save_file, "%d %d", &screen_move.x, &screen_move.y);
 	// Считываем расположение предметов
 	while (!feof(save_file)) {
 		pushThingFromFile(save_file, head);
@@ -168,11 +174,7 @@ int main(int argc, char *argv[]) {
 		wood_move.h = SCREEN_WIDTH / 7;
 		wood_move.w = SCREEN_WIDTH / 7;
 
-		SDL_Rect obj_size, screen_move;
 		last_frame = SDL_GetTicks();
-		// Спавн персонажа в центре экрана
-		screen_move.x = SCREEN_WIDTH / 2 - SCREEN_WIDTH / 20;
-		screen_move.y = SCREEN_HEIGHT / 2 - SCREEN_WIDTH / 20;
 
 		int quit = 0;
 		// Структура для хранения информации о событии
@@ -210,6 +212,7 @@ int main(int argc, char *argv[]) {
 							anim_type = 4;
 							break;
 						case SDLK_f:	// Добавление предметов
+							printf("#");
 							pushThing(head);
 							break;
 						case SDLK_d:	// Удаление предметов
@@ -226,6 +229,18 @@ int main(int argc, char *argv[]) {
 						case SDLK_b:
 							blue = blue - 10;
 							SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
+							break;
+						case SDLK_s:
+							save_file = fopen("save_game.txt", "w");
+							fprintf(save_file, "%d %d\n", SCREEN_WIDTH, SCREEN_HEIGHT);
+							fprintf(save_file, "%X %X %X\n", red, green, blue);
+							fprintf(save_file, "%d %d\n", screen_move.x, screen_move.y);
+							things* el = head->next;
+							while (el) {
+								fprintf(save_file, "%d %d\n", el->x, el->y);
+								el = el->next;
+							}
+							fclose(save_file);
 							break;
 						case SDLK_ESCAPE:	// Выход из игры
 							// Нажата клавиша ESC, меняем флаг выхода
