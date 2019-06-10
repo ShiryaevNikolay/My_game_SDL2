@@ -37,6 +37,7 @@ uint8_t red = 0xFF, green = 0xFF, blue = 0xFF;
 // путь к файлу с картинкой, содержащей файлы движения
 static char sprite[] = "resources/adventurer.png";
 static char wooden[] = "resources/wooden.png";
+static char textMenu[] = "resources/alphabet.png";
 // увеличение выводимых спрайтов (в данном примере исходно 32х32)
 int scale = 4;
 
@@ -44,6 +45,7 @@ int scale = 4;
 int initSDL();
 // функция для проведения завершения работы библиотеки и освобождения всех ресурсов
 void closeSDL();
+void Menu();
 // загрузка изображения
 SDL_Texture* loadImage(char imagePath[]);
 
@@ -57,6 +59,7 @@ SDL_Surface* screenSurface = NULL;
 // Переенные для хранения анимации персонажа
 SDL_Texture* sprite_sheet;
 SDL_Texture* wooden_sheet;
+SDL_Texture* text_sheet;
 // текущий кадр анимации
 int anim_phase = 0;
 // фаза анимации (бег, стояние на месте ...)
@@ -64,6 +67,8 @@ int anim_type = 0;
 // количество кадров анимации для данного типа
 int anim_phase_max[16] = { 13, 8, 10, 10, 10, 6, 4, 7, 13, 8, 10, 10, 10, 6, 4,
 		7 };
+// Кол-во букв в каждой строке
+int text[6] = {7, 6, 6, 6, 6, 2};
 // время с предыдущего кадра анимации
 uint32_t last_frame;
 // время в мс на 1 кадр
@@ -162,6 +167,9 @@ int main(int argc, char *argv[]) {
 		// Загружаем картирнку из файла
 		sprite_sheet = loadImage(sprite);
 		wooden_sheet = loadImage(wooden);
+		text_sheet = loadImage(textMenu);
+		// Вызываем меню игры
+		Menu();
 
 		SDL_Rect wood_size, wood_move;
 		// Растягиваем текстуру в полную картинку
@@ -195,18 +203,24 @@ int main(int argc, char *argv[]) {
 						// нажатой клавиши
 						switch (event.key.keysym.sym) {
 						case SDLK_UP:	// Движение вверх
-							screen_move.y -= SCREEN_WIDTH / 100;
+							if(screen_move.y >= -SCREEN_WIDTH / 40)
+								screen_move.y -= SCREEN_WIDTH / 100;
 							break;
 						case SDLK_DOWN:	// Движение вниз
-							screen_move.y += SCREEN_WIDTH / 100;
+							if(screen_move.y <= SCREEN_HEIGHT - SCREEN_WIDTH / 10)
+								screen_move.y += SCREEN_WIDTH / 100;
 							break;
 						case SDLK_LEFT:	// Движение влево
-							anim_type = 9;
-							screen_move.x -= SCREEN_WIDTH / 100;
+							if(screen_move.x >= -SCREEN_WIDTH / 30) {
+								anim_type = 9;
+								screen_move.x -= SCREEN_WIDTH / 100;
+							}
 							break;
 						case SDLK_RIGHT:	// Движение вправо
-							anim_type = 1;
-							screen_move.x += SCREEN_WIDTH / 100;
+							if(screen_move.x <= SCREEN_WIDTH - SCREEN_WIDTH / 15) {
+								anim_type = 1;
+								screen_move.x += SCREEN_WIDTH / 100;
+							}
 							break;
 						case SDLK_a:	// Атака
 							anim_phase = 0;
@@ -307,6 +321,23 @@ int main(int argc, char *argv[]) {
 	}
 	closeSDL();
 	return EXIT_SUCCESS;
+}
+
+void Menu() {
+	SDL_Rect text_rend, text_size;
+	text_rend.x = 0;
+	text_rend.y = 0;
+	text_rend.w = 1080;
+	text_rend.h = 1080;
+
+	text_size.x = 0;
+	text_size.y = 0;
+	text_size.w = 500;
+	text_size.h = 800;
+
+	SDL_RenderClear(renderer);
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	SDL_RenderPresent(renderer);
 }
 
 int initSDL() {
