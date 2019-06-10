@@ -126,7 +126,7 @@ void deleteThing (things *head) {
 		el->next = NULL;
 	}
 }
-
+// Переменные для считывания код цвета фона из файла
 unsigned int ur, ug, ub;
 
 int main(int argc, char *argv[]) {
@@ -209,10 +209,15 @@ int main(int argc, char *argv[]) {
 							screen_move.x += SCREEN_WIDTH / 100;
 							break;
 						case SDLK_a:	// Атака
-							anim_type = 4;
+							anim_phase = 0;
+							// Удар в ту сторону, куда был направлен персонаж
+							if(anim_type >= 0 && anim_type <= 7){
+								anim_type = 4;
+							} else {
+								anim_type = 12;
+							}
 							break;
 						case SDLK_f:	// Добавление предметов
-							printf("#");
 							pushThing(head);
 							break;
 						case SDLK_d:	// Удаление предметов
@@ -247,6 +252,13 @@ int main(int argc, char *argv[]) {
 							quit = 1;
 							break;
 						}
+					} else {
+						// Если персонаж был направлен вправо и нет анимации атаки, то проигрываем анимацию "на месте" вправо
+						if(anim_type > 0 && anim_type < 8 && anim_type != 4)
+							anim_type = 0;
+						// Инче если персонаж был направлен влево и нет анимации атаки, то проигрываем анимацию "на месте" влево
+						else if(anim_type > 7 && anim_type < 16 && anim_type != 12)
+							anim_type = 8;
 					}
 				}
 			}
@@ -254,7 +266,13 @@ int main(int argc, char *argv[]) {
 			// проверка прошедшего времени:
 			if ((SDL_GetTicks()- last_frame) >= frame_time) {
 				anim_phase++;
-				if (anim_phase >= anim_phase_max[anim_type]) anim_phase = 0;
+				if (anim_phase >= anim_phase_max[anim_type]) {
+					anim_phase = 0;
+					if(anim_type == 4)
+						anim_type = 0;
+					else if(anim_type == 12)
+						anim_type = 8;
+				}
 				last_frame = SDL_GetTicks();
 			}
 
