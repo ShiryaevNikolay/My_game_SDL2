@@ -45,7 +45,7 @@ int scale = 4;
 int initSDL();
 // функция для проведения завершения работы библиотеки и освобождения всех ресурсов
 void closeSDL();
-void Menu();
+void Menu1();
 // загрузка изображения
 SDL_Texture* loadImage(char imagePath[]);
 
@@ -134,6 +134,11 @@ void deleteThing (things *head) {
 // Переменные для считывания код цвета фона из файла
 unsigned int ur, ug, ub;
 
+int quit = 0;
+
+// Структура для хранения информации о событии
+SDL_Event event;
+
 int main(int argc, char *argv[]) {
 	FILE* save_file;
 	SDL_Rect obj_size, screen_move;
@@ -164,14 +169,13 @@ int main(int argc, char *argv[]) {
 	if (initSDL() > 1) {
 		printf("Error in initialization.\n");
 	} else {
-		int quit = 0;
 		// Загружаем картирнку из файла
 		sprite_sheet = loadImage(sprite);
 		wooden_sheet = loadImage(wooden);
 		text_sheet = loadImage(textMenu);
 
 		// Вызываем меню игры
-		Menu(save_file, quit);
+		Menu1(save_file);
 
 		SDL_Rect wood_size, wood_move;
 		// Растягиваем текстуру в полную картинку
@@ -186,8 +190,6 @@ int main(int argc, char *argv[]) {
 
 		last_frame = SDL_GetTicks();
 
-		// Структура для хранения информации о событии
-		SDL_Event event;
 		// Основной цикл программы, выход из которого происходит при
 		// появлении события выхода (от ОС или по нажатию ESC)
 		while (quit == 0) {
@@ -325,121 +327,192 @@ int main(int argc, char *argv[]) {
 }
 
 // Функция начального меню с настройками
-void Menu(FILE* save_file, int quit) {
+void Menu1(FILE* save_file) {
 	SDL_Rect text_rend, text_size;
-	text_size.w = 50; text_size.h = 50;
+	text_size.w = SCREEN_WIDTH / 50; text_size.h = SCREEN_WIDTH / 50;
 	SDL_RenderClear(renderer);
 	// И
 	text_rend.x = 350; text_rend.y = 250;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 0; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 2.79; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// З
 	text_rend.x = 200; text_rend.y = 250;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 35; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 2.68; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// М
 	text_rend.x = 0; text_rend.y = 490;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 70; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 2.6; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// Е
 	text_rend.x = 760; text_rend.y = 10;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 120; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 2.49; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// Н
 	text_rend.x = 230; text_rend.y = 490;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 160; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 2.4; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// И
 	text_rend.x = 350; text_rend.y = 250;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 190; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 2.34; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// Т
 	text_rend.x = 0; text_rend.y = 730;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 230; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 2.26; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// Ь
 	text_rend.x = 790; text_rend.y = 970;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 260; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 2.2; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// Н
 	text_rend.x = 230; text_rend.y = 490;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 350; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 2; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// А
 	text_rend.x = 0; text_rend.y = 10;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 380; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 1.95; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// С
 	text_rend.x = 870; text_rend.y = 490;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 420; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 1.9; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// Т
 	text_rend.x = 0; text_rend.y = 730;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 460; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 1.85; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// Р
-	text_rend.x = 700; text_rend.y = 490;
+	text_rend.x = 730; text_rend.y = 490;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 490; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 1.81; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// О
 	text_rend.x = 360; text_rend.y = 490;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 530; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 1.78; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// Й
 	text_rend.x = 500; text_rend.y = 250;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 570; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 1.73; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// К
 	text_rend.x = 670; text_rend.y = 250;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 610; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 1.69; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// И
 	text_rend.x = 350; text_rend.y = 250;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 650; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 1.65; text_size.y = SCREEN_HEIGHT / 3;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	// ?
 	text_rend.x = 350; text_rend.y = 1210;
 	text_rend.w = 170; text_rend.h = 170;
-
-	text_size.x = 690; text_size.y = 0;
+	text_size.x = SCREEN_WIDTH / 1.6; text_size.y = SCREEN_HEIGHT / 3;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Д
+	text_rend.x = 570; text_rend.y = 10;
+	text_rend.w = 170; text_rend.h = 190;
+	text_size.x = SCREEN_WIDTH / 3.29; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// А
+	text_rend.x = 0; text_rend.y = 10;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 3.10; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// (
+	text_rend.x = 330; text_rend.y = 1440;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 2.98; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Y
+	text_rend.x = 530; text_rend.y = 1210;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 2.92; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// )
+	text_rend.x = 450; text_rend.y = 1440;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 2.85; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Н
+	text_rend.x = 230; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 1.56; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Е
+	text_rend.x = 760; text_rend.y = 10;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 1.535; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Т
+	text_rend.x = 0; text_rend.y = 730;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 1.505; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// (
+	text_rend.x = 330; text_rend.y = 1440;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 1.48; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// N
+	text_rend.x = 650; text_rend.y = 1210;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 1.47; text_size.y = SCREEN_HEIGHT / 1.8;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// )
+	text_rend.x = 450; text_rend.y = 1440;
+	text_rend.w = 170; text_rend.h = 170;
+	text_size.x = SCREEN_WIDTH / 1.435; text_size.y = SCREEN_HEIGHT / 1.8;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	SDL_RenderPresent(renderer);
-	char c;
-	scanf("%c", &c);
+
+	int q = 0;
+	while (quit == 0) {
+		// Ждём появления события
+		while (SDL_PollEvent(&event)) {
+			// При его появлении проверяем тип
+			if (event.type == SDL_QUIT)
+				// Если событие выхода (сигнал от ОС, что приложение
+				// нужно завершить), меняем флаг выхода
+				quit = 1;
+			else {
+				if (event.type == SDL_KEYDOWN) {
+					// Если это нажатие на клавишу клавиатуры, смотрим код
+					// нажатой клавиши
+					switch (event.key.keysym.sym) {
+					case SDLK_y:
+
+						break;
+					case SDLK_n:
+						q = 1;
+						printf("#\n");
+						break;
+					case SDL_BUTTON_LEFT:
+
+						break;
+					case SDLK_ESCAPE:	// Выход из игры
+						// Нажата клавиша ESC, меняем флаг выхода
+						quit = 1;
+						break;
+					}
+				}
+			}
+			if(q == 1) break;
+		}
+		if(q == 1) break;
+	}
 }
 
 int initSDL() {
