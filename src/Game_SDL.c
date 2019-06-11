@@ -45,7 +45,7 @@ int scale = 4;
 int initSDL();
 // функция для проведения завершения работы библиотеки и освобождения всех ресурсов
 void closeSDL();
-void Menu1();
+void MenuMain();
 // загрузка изображения
 SDL_Texture* loadImage(char imagePath[]);
 
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
 		text_sheet = loadImage(textMenu);
 
 		// Вызываем меню игры
-		Menu1(save_file);
+		MenuMain(save_file);
 
 		SDL_Rect wood_size, wood_move;
 		// Растягиваем текстуру в полную картинку
@@ -326,8 +326,144 @@ int main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
-// Функция начального меню с настройками
-void Menu1(FILE* save_file) {
+// Функция второго экрана (выбора цвета)
+void MenuColor(FILE* save_file) {
+	// Читаем цвет из файла
+	save_file = fopen("save_game.txt", "r");
+	fscanf(save_file, "\n%X %X %X", &ur, &ug, &ub);
+	red = (uint8_t)ur;
+	green = (uint8_t)ug;
+	blue = (uint8_t)ub;
+	fclose(save_file);
+	SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
+
+	int q = 0;
+	while (quit == 0) {
+		// Ждём появления события
+		while (SDL_PollEvent(&event)) {
+			SDL_Rect text_rend, text_size;
+			text_size.w = SCREEN_WIDTH / 50; text_size.h = SCREEN_WIDTH / 50;
+			SDL_RenderClear(renderer);
+			// Ц
+			text_rend.x = 640; text_rend.y = 730;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 2.12; text_size.y = SCREEN_HEIGHT / 3;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// В
+			text_rend.x = 300; text_rend.y = 10;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 2.05; text_size.y = SCREEN_HEIGHT / 3;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// Е
+			text_rend.x = 750; text_rend.y = 10;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 2; text_size.y = SCREEN_HEIGHT / 3;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// Т
+			text_rend.x = 0; text_rend.y = 730;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 1.94; text_size.y = SCREEN_HEIGHT / 3;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// R
+			text_rend.x = 820; text_rend.y = 1210;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 4; text_size.y = SCREEN_HEIGHT / 1.8;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// G
+			text_rend.x = 0; text_rend.y = 1440;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 2; text_size.y = SCREEN_HEIGHT / 1.8;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// B
+			text_rend.x = 170; text_rend.y = 1440;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 1.3; text_size.y = SCREEN_HEIGHT / 1.8;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// Д
+			text_rend.x = 570; text_rend.y = 10;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 2.25; text_size.y = SCREEN_HEIGHT - SCREEN_WIDTH / 20;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// А
+			text_rend.x = 0; text_rend.y = 10;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 2.16; text_size.y = SCREEN_HEIGHT - SCREEN_WIDTH / 20;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// Л
+			text_rend.x = 850; text_rend.y = 250;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 2.09; text_size.y = SCREEN_HEIGHT - SCREEN_WIDTH / 20;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// Е
+			text_rend.x = 770; text_rend.y = 10;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 2.04; text_size.y = SCREEN_HEIGHT - SCREEN_WIDTH / 20;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// Е
+			text_rend.x = 770; text_rend.y = 10;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 2; text_size.y = SCREEN_HEIGHT - SCREEN_WIDTH / 20;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// (
+			text_rend.x = 330; text_rend.y = 1440;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 1.95; text_size.y = SCREEN_HEIGHT - SCREEN_WIDTH / 20;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// Y
+			text_rend.x = 530; text_rend.y = 1210;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 1.91; text_size.y = SCREEN_HEIGHT - SCREEN_WIDTH / 20;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			// )
+			text_rend.x = 450; text_rend.y = 1440;
+			text_rend.w = 170; text_rend.h = 170;
+			text_size.x = SCREEN_WIDTH / 1.87; text_size.y = SCREEN_HEIGHT - SCREEN_WIDTH / 20;
+			SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+			SDL_RenderPresent(renderer);
+
+			// При его появлении проверяем тип
+			if (event.type == SDL_QUIT)
+				// Если событие выхода (сигнал от ОС, что приложение
+				// нужно завершить), меняем флаг выхода
+				quit = 1;
+			else {
+				if (event.type == SDL_KEYDOWN) {
+					// Если это нажатие на клавишу клавиатуры, смотрим код
+					// нажатой клавиши
+					switch (event.key.keysym.sym) {
+					case SDLK_r:
+						red = red + 10;
+						SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
+						break;
+					case SDLK_g:
+						green = green + 10;
+						SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
+						break;
+					case SDLK_b:
+						blue = blue - 10;
+						SDL_SetRenderDrawColor(renderer, red, green, blue, 0xFF);
+						break;
+					case SDLK_y:
+						q = 1;
+						break;
+//					case SDL_BUTTON_LEFT:
+//
+//						break;
+					case SDLK_ESCAPE:	// Выход из игры
+						// Нажата клавиша ESC, меняем флаг выхода
+						quit = 1;
+						break;
+					}
+				}
+			}
+			if(q == 1) break;
+		}
+		if(q == 1) break;
+	}
+}
+
+// Функция первого экрана меню с настройками
+void MenuMain(FILE* save_file) {
 	SDL_Rect text_rend, text_size;
 	text_size.w = SCREEN_WIDTH / 50; text_size.h = SCREEN_WIDTH / 50;
 	SDL_RenderClear(renderer);
@@ -493,15 +629,16 @@ void Menu1(FILE* save_file) {
 					// нажатой клавиши
 					switch (event.key.keysym.sym) {
 					case SDLK_y:
-
+						MenuColor(save_file);
+						q = 1;
 						break;
 					case SDLK_n:
 						q = 1;
 						printf("#\n");
 						break;
-					case SDL_BUTTON_LEFT:
-
-						break;
+//					case SDL_BUTTON_LEFT:
+//
+//						break;
 					case SDLK_ESCAPE:	// Выход из игры
 						// Нажата клавиша ESC, меняем флаг выхода
 						quit = 1;
