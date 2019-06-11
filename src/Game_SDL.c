@@ -5,7 +5,7 @@
  Version     :
  Copyright   : Use at your own risk
  Description : Чтобы поменять разрешение окна, откройте файл "save_game.txt"
- 	 	 	   и поменяйти в первой строке первые два числа (default: 1600 900).
+ 	 	 	   и поменяйти в первой строке первые два числа (default: 1280 720).
  	 	 	   Для передвижения используйте стрелки.
  	 	 	   a - анимация атаки
  	 	 	   f - добавление предмета (дерево)
@@ -164,12 +164,14 @@ int main(int argc, char *argv[]) {
 	if (initSDL() > 1) {
 		printf("Error in initialization.\n");
 	} else {
+		int quit = 0;
 		// Загружаем картирнку из файла
 		sprite_sheet = loadImage(sprite);
 		wooden_sheet = loadImage(wooden);
 		text_sheet = loadImage(textMenu);
+
 		// Вызываем меню игры
-		Menu();
+		Menu(save_file, quit);
 
 		SDL_Rect wood_size, wood_move;
 		// Растягиваем текстуру в полную картинку
@@ -184,7 +186,6 @@ int main(int argc, char *argv[]) {
 
 		last_frame = SDL_GetTicks();
 
-		int quit = 0;
 		// Структура для хранения информации о событии
 		SDL_Event event;
 		// Основной цикл программы, выход из которого происходит при
@@ -323,21 +324,122 @@ int main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
-void Menu() {
+// Функция начального меню с настройками
+void Menu(FILE* save_file, int quit) {
 	SDL_Rect text_rend, text_size;
-	text_rend.x = 0;
-	text_rend.y = 0;
-	text_rend.w = 1080;
-	text_rend.h = 1080;
-
-	text_size.x = 0;
-	text_size.y = 0;
-	text_size.w = 500;
-	text_size.h = 800;
-
+	text_size.w = 50; text_size.h = 50;
 	SDL_RenderClear(renderer);
+	// И
+	text_rend.x = 350; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 0; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// З
+	text_rend.x = 200; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 35; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// М
+	text_rend.x = 0; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 70; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Е
+	text_rend.x = 760; text_rend.y = 10;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 120; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Н
+	text_rend.x = 230; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 160; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// И
+	text_rend.x = 350; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 190; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Т
+	text_rend.x = 0; text_rend.y = 730;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 230; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Ь
+	text_rend.x = 790; text_rend.y = 970;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 260; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Н
+	text_rend.x = 230; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 350; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// А
+	text_rend.x = 0; text_rend.y = 10;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 380; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// С
+	text_rend.x = 870; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 420; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Т
+	text_rend.x = 0; text_rend.y = 730;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 460; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Р
+	text_rend.x = 700; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 490; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// О
+	text_rend.x = 360; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 530; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Й
+	text_rend.x = 500; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 570; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// К
+	text_rend.x = 670; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 610; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// И
+	text_rend.x = 350; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 650; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// ?
+	text_rend.x = 350; text_rend.y = 1210;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 690; text_size.y = 0;
 	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
 	SDL_RenderPresent(renderer);
+	char c;
+	scanf("%c", &c);
 }
 
 int initSDL() {
