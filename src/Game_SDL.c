@@ -5,7 +5,7 @@
  Version     :
  Copyright   : Use at your own risk
  Description : Чтобы поменять разрешение окна, откройте файл "save_game.txt"
- 	 	 	   и поменяйти в первой строке первые два числа (default: 1600 900).
+ 	 	 	   и поменяйти в первой строке первые два числа (default: 1280 720).
  	 	 	   Для передвижения используйте стрелки.
  	 	 	   a - анимация атаки
  	 	 	   f - добавление предмета (дерево)
@@ -37,6 +37,7 @@ uint8_t red = 0xFF, green = 0xFF, blue = 0xFF;
 // путь к файлу с картинкой, содержащей файлы движения
 static char sprite[] = "resources/adventurer.png";
 static char wooden[] = "resources/wooden.png";
+static char textMenu[] = "resources/alphabet.png";
 // увеличение выводимых спрайтов (в данном примере исходно 32х32)
 int scale = 4;
 
@@ -44,6 +45,7 @@ int scale = 4;
 int initSDL();
 // функция для проведения завершения работы библиотеки и освобождения всех ресурсов
 void closeSDL();
+void Menu();
 // загрузка изображения
 SDL_Texture* loadImage(char imagePath[]);
 
@@ -57,6 +59,7 @@ SDL_Surface* screenSurface = NULL;
 // Переенные для хранения анимации персонажа
 SDL_Texture* sprite_sheet;
 SDL_Texture* wooden_sheet;
+SDL_Texture* text_sheet;
 // текущий кадр анимации
 int anim_phase = 0;
 // фаза анимации (бег, стояние на месте ...)
@@ -64,6 +67,8 @@ int anim_type = 0;
 // количество кадров анимации для данного типа
 int anim_phase_max[16] = { 13, 8, 10, 10, 10, 6, 4, 7, 13, 8, 10, 10, 10, 6, 4,
 		7 };
+// Кол-во букв в каждой строке
+int text[6] = {7, 6, 6, 6, 6, 2};
 // время с предыдущего кадра анимации
 uint32_t last_frame;
 // время в мс на 1 кадр
@@ -126,7 +131,7 @@ void deleteThing (things *head) {
 		el->next = NULL;
 	}
 }
-
+// Переменные для считывания код цвета фона из файла
 unsigned int ur, ug, ub;
 
 int main(int argc, char *argv[]) {
@@ -159,9 +164,14 @@ int main(int argc, char *argv[]) {
 	if (initSDL() > 1) {
 		printf("Error in initialization.\n");
 	} else {
+		int quit = 0;
 		// Загружаем картирнку из файла
 		sprite_sheet = loadImage(sprite);
 		wooden_sheet = loadImage(wooden);
+		text_sheet = loadImage(textMenu);
+
+		// Вызываем меню игры
+		Menu(save_file, quit);
 
 		SDL_Rect wood_size, wood_move;
 		// Растягиваем текстуру в полную картинку
@@ -176,7 +186,6 @@ int main(int argc, char *argv[]) {
 
 		last_frame = SDL_GetTicks();
 
-		int quit = 0;
 		// Структура для хранения информации о событии
 		SDL_Event event;
 		// Основной цикл программы, выход из которого происходит при
@@ -195,24 +204,35 @@ int main(int argc, char *argv[]) {
 						// нажатой клавиши
 						switch (event.key.keysym.sym) {
 						case SDLK_UP:	// Движение вверх
-							screen_move.y -= SCREEN_WIDTH / 100;
+							if(screen_move.y >= -SCREEN_WIDTH / 40)
+								screen_move.y -= SCREEN_WIDTH / 100;
 							break;
 						case SDLK_DOWN:	// Движение вниз
-							screen_move.y += SCREEN_WIDTH / 100;
+							if(screen_move.y <= SCREEN_HEIGHT - SCREEN_WIDTH / 10)
+								screen_move.y += SCREEN_WIDTH / 100;
 							break;
 						case SDLK_LEFT:	// Движение влево
-							anim_type = 9;
-							screen_move.x -= SCREEN_WIDTH / 100;
+							if(screen_move.x >= -SCREEN_WIDTH / 30) {
+								anim_type = 9;
+								screen_move.x -= SCREEN_WIDTH / 100;
+							}
 							break;
 						case SDLK_RIGHT:	// Движение вправо
-							anim_type = 1;
-							screen_move.x += SCREEN_WIDTH / 100;
+							if(screen_move.x <= SCREEN_WIDTH - SCREEN_WIDTH / 15) {
+								anim_type = 1;
+								screen_move.x += SCREEN_WIDTH / 100;
+							}
 							break;
 						case SDLK_a:	// Атака
-							anim_type = 4;
+							anim_phase = 0;
+							// Удар в ту сторону, куда был направлен персонаж
+							if(anim_type >= 0 && anim_type <= 7){
+								anim_type = 4;
+							} else {
+								anim_type = 12;
+							}
 							break;
 						case SDLK_f:	// Добавление предметов
-							printf("#");
 							pushThing(head);
 							break;
 						case SDLK_d:	// Удаление предметов
@@ -247,6 +267,13 @@ int main(int argc, char *argv[]) {
 							quit = 1;
 							break;
 						}
+					} else {
+						// Если персонаж был направлен вправо и нет анимации атаки, то проигрываем анимацию "на месте" вправо
+						if(anim_type > 0 && anim_type < 8 && anim_type != 4)
+							anim_type = 0;
+						// Инче если персонаж был направлен влево и нет анимации атаки, то проигрываем анимацию "на месте" влево
+						else if(anim_type > 7 && anim_type < 16 && anim_type != 12)
+							anim_type = 8;
 					}
 				}
 			}
@@ -254,7 +281,13 @@ int main(int argc, char *argv[]) {
 			// проверка прошедшего времени:
 			if ((SDL_GetTicks()- last_frame) >= frame_time) {
 				anim_phase++;
-				if (anim_phase >= anim_phase_max[anim_type]) anim_phase = 0;
+				if (anim_phase >= anim_phase_max[anim_type]) {
+					anim_phase = 0;
+					if(anim_type == 4)
+						anim_type = 0;
+					else if(anim_type == 12)
+						anim_type = 8;
+				}
 				last_frame = SDL_GetTicks();
 			}
 
@@ -289,6 +322,124 @@ int main(int argc, char *argv[]) {
 	}
 	closeSDL();
 	return EXIT_SUCCESS;
+}
+
+// Функция начального меню с настройками
+void Menu(FILE* save_file, int quit) {
+	SDL_Rect text_rend, text_size;
+	text_size.w = 50; text_size.h = 50;
+	SDL_RenderClear(renderer);
+	// И
+	text_rend.x = 350; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 0; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// З
+	text_rend.x = 200; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 35; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// М
+	text_rend.x = 0; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 70; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Е
+	text_rend.x = 760; text_rend.y = 10;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 120; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Н
+	text_rend.x = 230; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 160; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// И
+	text_rend.x = 350; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 190; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Т
+	text_rend.x = 0; text_rend.y = 730;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 230; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Ь
+	text_rend.x = 790; text_rend.y = 970;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 260; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Н
+	text_rend.x = 230; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 350; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// А
+	text_rend.x = 0; text_rend.y = 10;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 380; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// С
+	text_rend.x = 870; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 420; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Т
+	text_rend.x = 0; text_rend.y = 730;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 460; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Р
+	text_rend.x = 700; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 490; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// О
+	text_rend.x = 360; text_rend.y = 490;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 530; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// Й
+	text_rend.x = 500; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 570; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// К
+	text_rend.x = 670; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 610; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// И
+	text_rend.x = 350; text_rend.y = 250;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 650; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	// ?
+	text_rend.x = 350; text_rend.y = 1210;
+	text_rend.w = 170; text_rend.h = 170;
+
+	text_size.x = 690; text_size.y = 0;
+	SDL_RenderCopy(renderer, text_sheet, &text_rend, &text_size);
+	SDL_RenderPresent(renderer);
+	char c;
+	scanf("%c", &c);
 }
 
 int initSDL() {
