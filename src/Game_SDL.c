@@ -330,7 +330,15 @@ int main(int argc, char *argv[]) {
 void MenuColor(FILE* save_file) {
 	// Читаем цвет из файла
 	save_file = fopen("save_game.txt", "r");
-	fscanf(save_file, "\n%X %X %X", &ur, &ug, &ub);
+
+	// Пропускаем одну стоку в файле (разрешение экрана)
+	int val;
+	val = fgetc(save_file);
+	while(val != '\n'){
+		val = fgetc(save_file);
+	}
+
+	fscanf(save_file, "%X %X %X", &ur, &ug, &ub);
 	red = (uint8_t)ur;
 	green = (uint8_t)ug;
 	blue = (uint8_t)ub;
