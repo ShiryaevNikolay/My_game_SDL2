@@ -81,6 +81,9 @@ typedef struct things {
 	struct things *next;
 } things;
 
+// Переменная для отслеживания кол-ва предметов
+int bug_delete = 0;
+
 things* getLast(things *last) {
 	if (last == NULL) {
 		return NULL;
@@ -94,10 +97,12 @@ things* getLast(things *last) {
 void pushThing(things* head){
 	things* el = getLast(head);
 	things* tmp = (things*)malloc(sizeof(things));
-	tmp->x = rand() % 1500;
-	tmp->y = rand() % 800;
+	tmp->x = rand() % SCREEN_WIDTH;
+	tmp->y = rand() % SCREEN_HEIGHT;
 	tmp->next = NULL;
 	el->next = tmp;
+	// Увеличиваем счётчик кол-ва предметов
+	bug_delete = bug_delete + 1;
 }
 // Функция добавления в рендер предметы из файла
 void pushThingFromFile(FILE* file, things* head) {
@@ -106,6 +111,8 @@ void pushThingFromFile(FILE* file, things* head) {
 	if (fscanf(file, "%d %d", &tmp->x, &tmp->y) != EOF) {
 		tmp->next = NULL;
 		element->next = tmp;
+		// Увеличиваем счётчик кол-ва предметов
+		bug_delete = bug_delete + 1;
 	}
 }
 
@@ -130,6 +137,8 @@ void deleteThing (things *head) {
 		free(el->next);
 		el->next = NULL;
 	}
+	// Уменьшаем счётчик кол-ва предметов
+	bug_delete = bug_delete - 1;
 }
 // Переменные для считывания код цвета фона из файла
 unsigned int ur, ug, ub;
@@ -238,7 +247,9 @@ int main(int argc, char *argv[]) {
 							pushThing(head);
 							break;
 						case SDLK_d:	// Удаление предметов
-							deleteThing(head);
+							// Если нет предметов для удаления
+							if(bug_delete != 0)
+								deleteThing(head);
 							break;
 						case SDLK_r:
 							red = red + 10;
